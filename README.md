@@ -1,7 +1,7 @@
 # PDF-splitter
 PDF-splitter is a GUI application that's used to split 4-pages-in-1-sheet PDFs.
 ## Example
-An input and output example is provided in the folder [examples](https://github.com/ManOnSaturn/PDF-splitter/examples).
+An input and output example is provided in the folder [examples](https://github.com/ManOnSaturn/PDF-splitter/tree/main/examples).
 To create the example with multiple pages per sheet,
 [this tutorial](https://helpx.adobe.com/acrobat/kb/print-multiple-pages-per-sheet.html) can be followed.
 
