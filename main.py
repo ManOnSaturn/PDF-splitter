@@ -9,9 +9,8 @@ import fitz
 import tempfile
 import os
 from writepdf import write_pdf
-
+import sys
 # import Pmw
-# import sys
 
 # import ctypes
 # user32 = ctypes.windll.user32
@@ -108,9 +107,7 @@ def write_pdf_wrapper(file_path, pages_last_paper, x_list, y_list, width_iv, hei
 
     """
     output_path = fd.asksaveasfilename(
-        defaultextension='.pdf', filetypes=[("pdf files", '*.pdf')],
-        initialdir=os.path.expanduser("~/Desktop"),
-        title="Choose filename")
+        defaultextension='.pdf', filetypes=[("pdf files", '*.pdf')])
     write_pdf(file_path, output_path, pages_last_paper, x_list, y_list, width_iv, height_iv, compress)
 
 
@@ -118,6 +115,13 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('PDF-splitter live preview')
+        try: # If it's being run by pyinstaller
+            base_path = sys._MEIPASS
+        except AttributeError:
+            base_path = os.path.abspath(".")
+
+        icon_path = os.path.join(base_path, "appicon_182x182.ico")
+        self.iconbitmap(default=icon_path)
         self.configure(bg=bg_color)
         filetypes = (
             ('PDF files', '*.pdf'),
@@ -125,7 +129,11 @@ class App(tk.Tk):
         )
         file_path = fd.askopenfilename(title='Open a PDF', filetypes=filetypes)
 
-        doc = fitz.open(file_path)
+        try:
+            doc = fitz.open(file_path)
+        except RuntimeError: # File selection has been closed or failed
+            exit()
+
         page = doc.load_page(0)
 
         pix_file_name = save_temp_pix(page, alpha=False)
@@ -148,56 +156,59 @@ class App(tk.Tk):
         self.height_iv = IntVar()
         self.start_tool_window(file_path)
 
-    def start_tool_window(self, file_path):
-        tw = tk.Toplevel(self)
-        tw.resizable(width=False, height=False)
-        tw.title('Toolbox')
-        tw.configure(bg=bg_color)
-        tw.geometry("350x150")
+    def on_closing(self):
+        self.destroy()
 
-        tk.Label(tw, text="Rectangles", bg=bg_color).grid(row=0, column=0, columnspan=5)
+    def start_tool_window(self, file_path):
+        tool_window = tk.Toplevel(self)
+        tool_window.resizable(width=False, height=False)
+        tool_window.title('Toolbox')
+        tool_window.configure(bg=bg_color)
+        tool_window.geometry("350x150")
+
+        tk.Label(tool_window, text="Rectangles", bg=bg_color).grid(row=0, column=0, columnspan=5)
 
         e_size = 5
         start = 1
         end = 5
         for i in range(start, end):
             # X entry
-            tk.Label(tw, text="X", bg=bg_color).grid(row=i, column=1)
+            tk.Label(tool_window, text="X", bg=bg_color).grid(row=i, column=1)
             iv = IntVar()
             iv.set(self.rects[i - start][0])
             iv.trace_add("write", self.add_rectangles)
 
             self.x_list.append(iv)
-            tk.Entry(tw, width=e_size, textvariable=iv, validate="focusout").grid(row=i, column=2)
+            tk.Entry(tool_window, width=e_size, textvariable=iv, validate="focusout").grid(row=i, column=2)
 
             # Y entry
-            tk.Label(tw, text="Y", bg="gray").grid(row=i, column=3)
+            tk.Label(tool_window, text="Y", bg="gray").grid(row=i, column=3)
             iv = IntVar()
             iv.set(self.rects[i - start][1])
             iv.trace_add("write", self.add_rectangles)
 
             self.y_list.append(iv)
-            tk.Entry(tw, width=e_size, textvariable=iv, validate="focusout").grid(row=i, column=4)
+            tk.Entry(tool_window, width=e_size, textvariable=iv, validate="focusout").grid(row=i, column=4)
 
         # Dimensions of the rectangles
-        tk.Label(tw, text="Dimensions", bg=bg_color).grid(row=0, column=6, columnspan=6)
-        tk.Label(tw, text="Width", bg=bg_color).grid(row=1, column=7, padx=10)
+        tk.Label(tool_window, text="Dimensions", bg=bg_color).grid(row=0, column=6, columnspan=6)
+        tk.Label(tool_window, text="Width", bg=bg_color).grid(row=1, column=7, padx=10)
         self.width_iv.set(max(int(l[2]) for l in self.rects))
         self.width_iv.trace_add("write", self.add_rectangles)
-        tk.Entry(tw, width=e_size, textvariable=self.width_iv, validate="focusout").grid(row=1, column=8)
-        tk.Label(tw, text="Height", bg=bg_color).grid(row=1, column=9)
+        tk.Entry(tool_window, width=e_size, textvariable=self.width_iv, validate="focusout").grid(row=1, column=8)
+        tk.Label(tool_window, text="Height", bg=bg_color).grid(row=1, column=9)
         self.height_iv.set(max(int(l[3]) for l in self.rects))
         self.height_iv.trace_add("write", self.add_rectangles)
-        tk.Entry(tw, width=e_size, textvariable=self.height_iv, validate="focusout").grid(row=1, column=10)
+        tk.Entry(tool_window, width=e_size, textvariable=self.height_iv, validate="focusout").grid(row=1, column=10)
         self.add_rectangles()
 
-        tk.Label(tw, text="Slides on last page", bg=bg_color).grid(row=2, column=7, columnspan=2)
+        tk.Label(tool_window, text="Slides on last page", bg=bg_color).grid(row=2, column=7, columnspan=2)
         pages_last_paper = IntVar()
         pages_last_paper.set(4)
-        tk.Entry(tw, width=e_size, textvariable=pages_last_paper, validate="focusout").grid(row=2, column=10)
+        tk.Entry(tool_window, width=e_size, textvariable=pages_last_paper, validate="focusout").grid(row=2, column=10)
 
         compress = BooleanVar()
-        compress_button = Checkbutton(tw, text="Compress", variable=compress, bg="gray")
+        compress_button = Checkbutton(tool_window, text="Compress", variable=compress, bg="gray")
         compress_button.grid(row=3, column=8, columnspan=2)
 
         # Pmw removed 'cause of incompatibility with pyinstaller
@@ -206,7 +217,7 @@ class App(tk.Tk):
         #     balloon = Pmw.Balloon(tw)
         #     balloon.bind(compress_button, "Recommended.\nCompress the file size by about 90% by deleting extra data.")
 
-        tk.Button(tw, text="Start splitting",
+        tk.Button(tool_window, text="Start splitting",
                   command=lambda: write_pdf_wrapper(file_path, pages_last_paper, self.x_list,
                                                     self.y_list, self.width_iv, self.height_iv,
                                                     compress)).grid(row=4, column=8, columnspan=2)
