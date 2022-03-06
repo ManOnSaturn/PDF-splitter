@@ -111,29 +111,38 @@ def write_pdf_wrapper(file_path, pages_last_paper, x_list, y_list, width_iv, hei
     write_pdf(file_path, output_path, pages_last_paper, x_list, y_list, width_iv, height_iv, compress)
 
 
+def get_resource(resource):
+    """Used to handle weird pyinstaller file loading and keep normal file loading intact.
+
+        Parameters:
+            resource (str): File name of the resource to load.
+
+        Returns:
+            (str): Full path to the resource to laod.
+
+    """
+    try:  
+        base_path = sys._MEIPASS # If it's being run by pyinstaller
+    except AttributeError:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, resource)
+
+    
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('PDF-splitter live preview')
-        try: # If it's being run by pyinstaller
-            base_path = sys._MEIPASS
-        except AttributeError:
-            base_path = os.path.abspath(".")
 
-        icon_path = os.path.join(base_path, "appicon_182x182.ico")
-        self.iconbitmap(default=icon_path)
+        self.iconbitmap(default=get_resource("appicon_182x182.ico"))
         self.configure(bg=bg_color)
         filetypes = (
             ('PDF files', '*.pdf'),
             ('All files', '*.*')
         )
-        file_path = fd.askopenfilename(title='Open a PDF', filetypes=filetypes)
+        file_path = fd.askopenfilename(filetypes=filetypes)
 
-        try:
-            doc = fitz.open(file_path)
-        except RuntimeError: # File selection has been closed or failed
-            exit()
-
+        doc = fitz.open(file_path)
         page = doc.load_page(0)
 
         pix_file_name = save_temp_pix(page, alpha=False)
@@ -155,9 +164,6 @@ class App(tk.Tk):
         self.width_iv = IntVar()
         self.height_iv = IntVar()
         self.start_tool_window(file_path)
-
-    def on_closing(self):
-        self.destroy()
 
     def start_tool_window(self, file_path):
         tool_window = tk.Toplevel(self)
