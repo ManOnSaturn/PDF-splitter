@@ -36,7 +36,7 @@ Download it via [Ghostscript website](https://bit.ly/3Hv7rrO).
 
 **How to create an executable**
 
-On windows, i've used pyinstaller v4.9 and executed this command:
+On Windows, I've used pyinstaller v4.9 and executed this command:
 ```sh
 pyinstaller main.py -F -w --name PDF-splitter-win64 --icon="appicon_182x182.ico" --add-data "appicon_182x182.ico;."
 ```
@@ -49,4 +49,4 @@ PDF-splitter uses a number of projects to work properly:
 
 
 ## The idea
-While i had my exams in university, some teachers provided wierdly-formatted PDFs that contain shrinked slides. With the desire of an increased readability of the latters, i have created this program. It is also easly usable by non tech-savvy students who don't want to bother with Python usage, by delivering executables.
+While I had my exams in university, some teachers provided weirdly-formatted PDFs that contain shrunk slides. With the desire of an increased readability of the latters, I have created this program. It is also easily usable by non-tech-savvy students who don't want to bother with Python usage, by delivering executables.
