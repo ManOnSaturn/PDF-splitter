@@ -1,3 +1,5 @@
+<p align="center"><img src="/appicon_182x182.ico" width="150" /></p>
+
 # PDF-splitter
 PDF-splitter is a GUI application that's used to split 4-pages-in-1-sheet PDFs.
 ## Example
@@ -6,15 +8,18 @@ To create the example with multiple pages per sheet,
 [this tutorial](https://helpx.adobe.com/acrobat/kb/print-multiple-pages-per-sheet.html) can be followed.
 
 The live preview
+<p align="center"><img src="/images/live_preview.png" width="300" /></p>
 
 The toolbox
+<p align="center"><img src="/images/toolbox.png" width="300" /></p>
 
 ## Usage
 For the purpose of making the program usable to anyone, you can choose between two options
 
 **Option 1 (easy mode)**: Open the executable
 
-You just need to download the appropriate file for your Operative System and double-click it. Check the folder Executables
+You just need to download the appropriate file for your Operative System and double-click it.
+Check the folder [executables](https://github.com/ManOnSaturn/PDF-splitter/tree/main/executables)
 
 **Option 2 (programmer  mode)**: Execute the source code
 
@@ -28,6 +33,13 @@ python main.py
 If you don't want to have a 100MB PDF as an output, you can tick the option "compress" in the program.
 In order for it to work, you need to have ghostscript installed.
 Download it via [Ghostscript website](https://bit.ly/3Hv7rrO).
+
+**How to create an executable**
+
+On windows, i've used pyinstaller v4.9 and executed this command:
+```sh
+pyinstaller main.py -F -w --name PDF-splitter-win64 --icon="appicon_182x182.ico" --add-data "appicon_182x182.ico;."
+```
 ## Tech
 PDF-splitter uses a number of projects to work properly:
 - [PyPDF3] - PDF I/O operations simply done in Python.
